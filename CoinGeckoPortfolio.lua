@@ -83,8 +83,8 @@ function RefreshAccount (account, since)
                         quantity = coinQuantity,
                         price = requestCurrentCoinPrice(coinID),
                         currencyOfPrice = currency,
-						exchangeRate = 1.0
-				}
+                                                exchangeRate = 1.0
+                                }
 
         end
 
@@ -112,3 +112,5 @@ end
 function coinPriceRequestUrl(coinId)
         return "https://api.coingecko.com/api/v3/simple/price?ids=" .. coinId .. "&vs_currencies=" .. currency
 end
+
+-- SIGNATURE: MC0CFQCA7halubyyth8b74rg3F2p0y9uDwIUf/aQr6Xx+a0VapYoHSVUTeSE1gE=
