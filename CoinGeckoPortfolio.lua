@@ -29,10 +29,10 @@
 
 
 WebBanking{
-  version = 1.0,
-  country = "de",
-  description = "Include your crypto currency in MoneyMoney by providing the crypto symbols and the number of coins as username. Example: POLKADOT(10),CARDANO(100)",
-  services= { "CoinGeckoPortfolio" }
+    version = 1.1,
+    country = "de",
+    description = "Include your crypto currency in MoneyMoney by providing the crypto symbols and the number of coins as username. Example: POLKADOT(10),CARDANO(100)",
+    services= { "CoinGeckoPortfolio" }
 }
 
 local coinSymbols
@@ -40,77 +40,83 @@ local connection = Connection()
 local currency = "EUR"
 
 function SupportsBank (protocol, bankCode)
-  return protocol == ProtocolWebBanking and bankCode == "CoinGeckoPortfolio"
+    return protocol == ProtocolWebBanking and bankCode == "CoinGeckoPortfolio"
 end
 
 function InitializeSession (protocol, bankCode, username, username2, password, username3)
-        coinSymbols = username:gsub("%s+", "")
+    coinSymbols = username:gsub("%s+", "")
 end
 
 function ListAccounts (knownAccounts)
-  local account = {
-    name = "CoinGeckoPortfolio",
-    accountNumber = "CoinGeckoPortfolio",
-    currency = currency,
-    portfolio = true,
-    type = "AccountTypePortfolio"
-  }
+    local account = {
+        name = "CoinGeckoPortfolio",
+        accountNumber = "CoinGeckoPortfolio",
+        currency = currency,
+        portfolio = true,
+        type = "AccountTypePortfolio"
+    }
 
-  return {account}
+    return {account}
 end
 
 
 function RefreshAccount (account, since)
-        local s = {}
+    local s = {}
 
-        -- Create substring with stock information from comma separated input
-        for coin in string.gmatch(coinSymbols, '([^,]+)') do
+    -- Create substring with stock information from comma separated input
+    for coin in string.gmatch(coinSymbols, '([^,]+)') do
 
-                -- Extract Market, Ticker, Quantity and Currency from substring
-                -- Pattern: POLKADOT(10),CARDANO(100)
-                coinID=coin:match("([^(]+)")
-                coinQuantity=coin:match("%((%S+)%)")
+        -- Extract Market, Ticker, Quantity and Currency from substring
+        -- Pattern: POLKADOT(10),CARDANO(100)
+        coinID=coin:match("([^(]+)")
+        coinQuantity=coin:match("%((%S+)%)")
 
-                -- Retrieve JSON from Coingecko as a basis for extracting price and name
-                coinJSON = requestCurrentCoinPriceJSON(coinID)
+        -- Create new stock item and put is to the list
+        s[#s+1] = {
+            name = coinID,
+            securityNumber = coinID,
+            market = "CoinGecko",
+            currency = nil,
+            quantity = coinQuantity,
+            price = requestCurrentCoinPrice(coinID),
+            currencyOfPrice = currency,
+            exchangeRate = 1.0
+        }
 
-                -- Create new stock item and put is to the list
-                s[#s+1] = {
-                        name = coinID,
-                        securityNumber = coinID,
-                        market = "CoinGecko",
-                        currency = nil,
-                        quantity = coinQuantity,
-                        price = requestCurrentCoinPrice(coinID),
-                        currencyOfPrice = currency,
-                                                exchangeRate = 1.0
-                                }
+        os.sleep(6000)
 
-        end
+    end
 
-        return {securities = s}
+    return {securities = s}
+
 end
 
 
 function EndSession ()
-        connection:close()
+    connection:close()
 end
-
 
 
 -- Query Functions
-function requestCurrentCoinPrice(coinId)
-        return requestCurrentCoinPriceJSON(coinId):dictionary()[string.lower(coinID)][string.lower(currency)]
+function requestCurrentCoinPrice(coinID)
+    return requestCurrentCoinPriceJSON(coinID):dictionary()[string.lower(coinID)][string.lower(currency)]
 end
 
-function requestCurrentCoinPriceJSON(coinId)
-        return JSON(connection:request("GET", coinPriceRequestUrl(coinId)))
+function requestCurrentCoinPriceJSON(coinID)
+    return JSON(connection:request("GET", coinPriceRequestUrl(coinID)))
 end
 
 
 -- URL Helper Functions
 function coinPriceRequestUrl(coinId)
-        return "https://api.coingecko.com/api/v3/simple/price?ids=" .. coinId .. "&vs_currencies=" .. currency
+    return "https://api.coingecko.com/api/v3/simple/price?ids=" .. coinId .. "&vs_currencies=" .. currency
 end
 
--- SIGNATURE: MC0CFQCA7halubyyth8b74rg3F2p0y9uDwIUf/aQr6Xx+a0VapYoHSVUTeSE1gE=
+
+-- Sleep Helfer Function
+function os.sleep(msec)
+    local now = os.clock() + msec/1000
+    repeat until os.clock() >= now
+end
+
+-- SIGNATURE: MC4CFQCdBxLhOkHZmG2FUeyu7lOoRU09XQIVAJJ1AqUgIjA2gQHUGGSi2ww+U6WF
