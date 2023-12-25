@@ -29,7 +29,7 @@
 
 
 WebBanking{
-    version = 1.1,
+    version = 1.2,
     country = "de",
     description = "Include your crypto currency in MoneyMoney by providing the crypto symbols and the number of coins as username. Example: POLKADOT(10),CARDANO(100)",
     services= { "CoinGeckoPortfolio" }
@@ -44,7 +44,30 @@ function SupportsBank (protocol, bankCode)
 end
 
 function InitializeSession (protocol, bankCode, username, username2, password, username3)
-    coinSymbols = username:gsub("%s+", "")
+    config = username:gsub("%s+", "")
+    delay = 0
+
+    if config:find(";") then
+        settings = string.sub(config,1,config:find(";")-1)
+        coinSymbols = string.sub(config,config:find(";")+1,-1)
+    else
+        coinSymbols = config
+    end
+
+    local _, count = string.gsub(coinSymbols, ",", "")
+    if count > 5 then
+        delay = 12000
+    end
+
+    if settings ~= nil then
+        for setting in string.gmatch(settings, '([^,]+)') do
+            name = setting:match("([^(]+)")
+            if name == "DELAY" then
+                delay = setting:match("%((%S+)%)")
+            end
+        end
+    end
+
 end
 
 function ListAccounts (knownAccounts)
@@ -83,7 +106,7 @@ function RefreshAccount (account, since)
             exchangeRate = 1.0
         }
 
-        os.sleep(6000)
+        MM.sleep(tonumber(delay) / 1000)
 
     end
 
@@ -112,11 +135,4 @@ function coinPriceRequestUrl(coinId)
     return "https://api.coingecko.com/api/v3/simple/price?ids=" .. coinId .. "&vs_currencies=" .. currency
 end
 
-
--- Sleep Helfer Function
-function os.sleep(msec)
-    local now = os.clock() + msec/1000
-    repeat until os.clock() >= now
-end
-
--- SIGNATURE: MC4CFQCdBxLhOkHZmG2FUeyu7lOoRU09XQIVAJJ1AqUgIjA2gQHUGGSi2ww+U6WF
+-- SIGNATURE: MC0CFAcvoN5jNlgDt+IL61BXubE3R0hnAhUAggb0/onM+3ncnMGYDK0jVA8nZpY=

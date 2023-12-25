@@ -11,5 +11,10 @@ Inofficial CoinGecko Extension for MoneyMoney
 ### Bonus
 Add the buying rates in MoneyMoney via right click on the stock to display the profits.
 
+### Known Issues
+
+CoinGecko is using rate limits for guest users. Those rate limits seem to change from time to time.  
+In case you run into a `HTTPS response: Too Many Requests` issue, you might want to set the delay (in ms) manually, followed by a semicolon. Example: `DELAY(12000);POLKADOT(10),CARDANO(100)`
+
 ### Requirements
 You need at least version 2.4.x or a beta version of MoneyMoney.
