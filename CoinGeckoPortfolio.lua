@@ -46,19 +46,19 @@ end
 function InitializeSession (protocol, bankCode, username, username2, password, username3)
     config = username:gsub("%s+", "")
     delay = 0
-    
+
     if config:find(";") then
         settings = string.sub(config,1,config:find(";")-1)
         coinSymbols = string.sub(config,config:find(";")+1,-1)
     else
         coinSymbols = config
     end
-    
+
     local _, count = string.gsub(coinSymbols, ",", "")
     if count > 5 then
         delay = 12000
     end
-        
+
     if settings ~= nil then
         for setting in string.gmatch(settings, '([^,]+)') do
             name = setting:match("([^(]+)")
@@ -67,7 +67,7 @@ function InitializeSession (protocol, bankCode, username, username2, password, u
             end
         end
     end
-    
+
 end
 
 function ListAccounts (knownAccounts)
@@ -106,7 +106,7 @@ function RefreshAccount (account, since)
             exchangeRate = 1.0
         }
 
-        os.sleep(delay)
+        MM.sleep(tonumber(delay) / 1000)
 
     end
 
@@ -135,9 +135,4 @@ function coinPriceRequestUrl(coinId)
     return "https://api.coingecko.com/api/v3/simple/price?ids=" .. coinId .. "&vs_currencies=" .. currency
 end
 
-
--- Sleep Helfer Function
-function os.sleep(msec)
-    local now = os.clock() + msec/1000
-    repeat until os.clock() >= now
-end
+-- SIGNATURE: MC0CFAcvoN5jNlgDt+IL61BXubE3R0hnAhUAggb0/onM+3ncnMGYDK0jVA8nZpY=
